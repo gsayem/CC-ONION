@@ -1,0 +1,68 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Login</h2>
+<p>Default user and password: <b>john.doe@email.com</b> / <b>JohnDoe123</b></p>
+<form id="frmLogin">
+    <div class="form-group">
+        @Html.LabelFor(m => m.EmailAddress, "Email address")
+        @Html.TextBoxFor(m => m.EmailAddress, new { @class = "form-control", @placeholder = "Enter email address" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, "Password")
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control", @placeholder = "Password" })
+    </div>
+
+
+    <button id="btnLogin" type="button" class="btn btn-primary">Login</button>
+    <a id="btnRegister" type="button" class="btn btn-primary" asp-area="" asp-controller="User" asp-action="UserRegistration">Register</a>
+</form>
+
+
+@section scripts{
+    <script>
+$(document).ready(function () {
+    $("#btnLogin").click(function (e) {
+
+                $.ajax({
+                    url: '@Url.Action("Login", "Home")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: $("#frmLogin").serialize(),
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    success: function (data) {
+                        $(".alert").find("p").text(data.message);
+                        let cls = "alert-success";
+                        var delay = 1000;
+                        if (data.code === "Failure") {
+                            cls = "alert-danger"
+                            delay = 5000
+                        }
+                        if (data.code === "Warning") {
+                            cls = "alert-warning"
+                            delay = 5000
+                        }
+                        $(".alert").addClass(cls);
+                        $(".alert").delay(delay).addClass("in").toggle(true).fadeOut(delay, function () {
+                                $(".alert").removeClass("in");
+                                $(".alert").removeClass(cls);
+                                $(".alert").find("p").text('');
+                                if (data.code === "Success") {
+                                    window.location.href = '@Url.Action("UserList", "User")';
+                                }
+                            });
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                 });
+
+
+            });
+        });
+    </script>
+}

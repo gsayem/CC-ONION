@@ -1,0 +1,121 @@
+﻿@model CallDurationViewModel
+@{
+    ViewData["Title"] = "Callee List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Callee Call Duration Details </h2>
+
+<form id="frmCallee">
+    @Html.HiddenFor(m => m.Id, new { id = "Id" })
+    @Html.HiddenFor(m => m.CalleeId, new { id = "CalleeId" })
+    <div class="card">
+        <div class="card-header">
+
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    @Html.LabelFor(m => m.CallDateTime, "Date [MM/dd/yyyy HH:mm:ss]")
+                    @Html.TextBoxFor(m => m.CallDateTime, new { id = "CallDateTime", @class = "form-control", @placeholder = "Enter Date Time " })
+                </div>
+                <div class="form-group col-md-6">
+                    @Html.LabelFor(m => m.Charge, "Charge")
+                    @Html.TextBoxFor(m => m.Charge, new { @class = "form-control", @readOnly = "readOnly", @placeholder = "Auto Calculate" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    @Html.LabelFor(m => m.CallDuration, "Duration In Seconds")
+                    @Html.TextBoxFor(m => m.CallDuration, new { @class = "form-control", @placeholder = "Duration", @type = "number" })
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="form-group col mx-1">
+                        <button type="button" class="btn btn-primary" id="btnAddItem">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Call List
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Call date time</th>
+                        <th>Duration</th>
+                        <th>Charge</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model.CallDurationList)
+                    {
+                        <tr>
+                            <td>@item.CallDateTime</td>
+                            <td>@item.CallDuration</td>
+                            <td>@item.Charge</td>
+                            <td><a asp-controller="Callee" asp-action="CalleeDuration" asp-route-calleeId="@item.CalleeId" asp-route-durationId="@item.Id">Edit</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+
+    $("#btnAddItem").click(function (e) {
+                $.ajax({
+                    url: '@Url.Action("SaveCalleeDuration", "Callee")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: $("#frmCallee").serialize(),
+                    success: function (data) {
+                        $(".alert").find("p").text(data.message);
+                        let cls = "alert-success";
+                        var delay = 1000;
+                        if (data.code === "Failure") {
+                            cls = "alert-danger"
+                            delay = 5000
+                        }
+                        if (data.code === "Warning") {
+                            cls = "alert-warning"
+                            delay = 5000
+                        }
+                        $(".alert").addClass(cls).alert();
+                        $(".alert").delay(delay).addClass("in").toggle(true).fadeOut(delay, function () {
+                            $(".alert").removeClass("in");
+                            $(".alert").removeClass(cls);
+                            $(".alert").find("p").text('');
+                        });
+
+                        if (data.code === "Success") {
+                            window.location.href = '@Url.Action("CalleeDuration", "Callee", new { calleeId = Model.CalleeId})';
+                            //$("#id").val(data.data.id);
+                            //$("#calleeId").val(data.data.id);
+                            //var markup = "<tr><td>" + data.data.callDateTime + "</td><td>" + data.data.callDuration + "</td><td>" + data.data.charge
+                            //    + "</td><td><a href='#'>Edit</a></td></tr>";
+                            //$("table tbody").append(markup);
+                            //$("#CallDateTime").val('');
+                            //$("#CallDuration").val('');
+                            //$("#Charge").val('Auto Calculate');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                 });
+            });
+        });
+    </script>
+}
+

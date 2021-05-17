@@ -1,0 +1,80 @@
+﻿@model List<UserLoginHistoryViewModel>
+@{
+    ViewData["Title"] = "User Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>User List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Given name</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Last Login</th>
+            <th> </th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.GivenName</td>
+                <td>@item.Surname</td>
+                <td>@item.EmailAddress</td>
+                <td id="@item.UserId">@item.LastLogin</td>
+                <td style="cursor: pointer;" onclick="updateLastLoginTime('$this', '@item.UserId')">Refresh</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@section scripts{
+    <script>
+        function updateLastLoginTime(elem, userId) {
+            $.ajax({
+                    url: '@Url.Action("GetUserInformation", "User")',
+                    type: 'GET',
+                    dataType: 'json',
+                data: { userId: userId} ,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        $(".alert").find("p").text(data.message);
+                        let cls = "alert-success";
+                        var delay = 1000;
+                        if (data.code === "Success") {
+                            debugger;
+                            $('#'+userId).text(data.data.lastLogin)
+                        } else {
+                            delay = 5000;
+                            if (data.code === "Failure") {
+                                cls = "alert-danger"
+                            }
+                            if (data.code === "Warning") {
+                                cls = "alert-warning"
+
+                            }
+                            $(".alert").addClass(cls);
+                            $(".alert").delay(delay).addClass("in").toggle(true).fadeOut(delay, function () {
+                                $(".alert").removeClass("in");
+                                $(".alert").removeClass(cls);
+                                $(".alert").find("p").text('');
+                            });
+                        }
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                 });
+        }
+
+
+
+
+
+    </script>
+}

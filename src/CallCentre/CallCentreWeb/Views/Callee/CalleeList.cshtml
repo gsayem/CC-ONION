@@ -1,0 +1,113 @@
+﻿@model List<CallCentreRecordViewModel>
+@{
+    ViewData["Title"] = "Callee List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Callee List</h2>
+<a href="/Callee/Create" class="btn btn-primary">Add New</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>Phone</th>
+            <th>Last call date time</th>
+            <th>Total duration</th>
+            <th>Total charge</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.FirstName</td>
+                <td>@item.Lastname</td>
+                <td>@item.Phone</td>
+                <td id="@item.Id">@item.LastCallDateTime</td>
+                <td>@item.TotalCallDuration</td>
+                <td>@item.TotalCharge</td>
+                <td>
+                    <a asp-area="" asp-controller="Callee" asp-action="Create" asp-route-id="@item.Id">Edit</a> |
+                    <a data-href="@item.Id" data-toggle="modal" data-target="#confirm-delete" style="cursor: pointer;">Delete</a> |
+                    <a asp-area="" asp-controller="Callee" asp-action="CalleeDuration" asp-route-calleeId="@item.Id">Duration</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">                
+                <h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
+            </div>
+
+            <div class="modal-body">
+                <p>Are you sure, you want to delete this data?</p>
+                <p>All Child data will also delete.</p>
+                <p>Do you want to proceed?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger btn-ok">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script>
+        $('#confirm-delete').on('show.bs.modal', function (e) {
+            $(this).find('.btn-ok').attr('href', 'CalleeDelete/'+ $(e.relatedTarget).data('href'));
+        });
+        function deleteCallee(elem, userId) {
+            $.ajax({
+                    url: '@Url.Action("GetUserInformation", "User")',
+                    type: 'GET',
+                    dataType: 'json',
+                data: { userId: userId} ,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        $(".alert").find("p").text(data.message);
+                        let cls = "alert-success";
+                        var delay = 1000;
+                        if (data.code === "Success") {
+                            debugger;
+                            $('#'+userId).text(data.data.lastLogin)
+                        } else {
+                            delay = 5000;
+                            if (data.code === "Failure") {
+                                cls = "alert-danger"
+                            }
+                            if (data.code === "Warning") {
+                                cls = "alert-warning"
+
+                            }
+                            $(".alert").addClass(cls);
+                            $(".alert").delay(delay).addClass("in").toggle(true).fadeOut(delay, function () {
+                                $(".alert").removeClass("in");
+                                $(".alert").removeClass(cls);
+                                $(".alert").find("p").text('');
+                            });
+                        }
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+                    }
+                 });
+        }
+
+
+
+
+
+    </script>
+}

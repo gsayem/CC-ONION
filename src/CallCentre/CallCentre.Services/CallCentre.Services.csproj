@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CallCentre.Common\CallCentre.Common.csproj" />
+    <ProjectReference Include="..\CallCentre.Interfaces\CallCentre.Interfaces.csproj" />
+    <ProjectReference Include="..\CallCentre.Model\CallCentre.Model.csproj" />
+  </ItemGroup>
+
+</Project>
