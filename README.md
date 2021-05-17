@@ -9,3 +9,6 @@ Steps:
 Above command will generate the database If database connection is correct.
 
 Now you can run the application.
+
+
+Live URL: https://cc-onion.sayem.xyz/
